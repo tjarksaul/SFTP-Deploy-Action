@@ -14,9 +14,17 @@ chmod 600 $TEMP_SSH_PRIVATE_KEY_FILE
 
 echo 'sftp start'
 # create a temporary file containing sftp commands
-printf "%s\n" "-mkdir $6" >$TEMP_SFTP_FILE
-(cd $5; find * -type d -exec echo -mkdir $6/{} \;) >>$TEMP_SFTP_FILE
-printf "%s" "put -r $5/* $6" >>$TEMP_SFTP_FILE
+touch $TEMP_SFTP_FILE
+if [ -d "$5" ] 
+then
+  printf "%s\n" "-mkdir $6" >$TEMP_SFTP_FILE
+  (cd $5; find * -type d -exec echo -mkdir $6/{} \;) >>$TEMP_SFTP_FILE
+  printf "%s" "put -r $5* $6" >>$TEMP_SFTP_FILE
+else
+  printf "%s" "put $5 $6" >>$TEMP_SFTP_FILE
+fi
+# upload actual data
+
 #-o StrictHostKeyChecking=no avoid Host key verification failed.
 sftp -b $TEMP_SFTP_FILE -P $3 $7 -o StrictHostKeyChecking=no -i $TEMP_SSH_PRIVATE_KEY_FILE $1@$2
 
